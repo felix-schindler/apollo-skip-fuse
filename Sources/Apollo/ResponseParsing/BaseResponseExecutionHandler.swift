@@ -26,7 +26,7 @@ struct BaseResponseExecutionHandler: Sendable {
     selectionSet: Data.Type,
     with accumulator: Accumulator
   ) async throws -> Accumulator.FinalResult? {
-    guard let dataEntry = responseBody["data"] as? JSONObject else {
+    guard let dataEntry = JSONValueConversion.jsonObject(from: responseBody["data"]) else {
       return nil
     }
 
@@ -49,7 +49,7 @@ struct BaseResponseExecutionHandler: Sendable {
     in operation: Operation.Type,
     with accumulator: Accumulator
   ) async throws -> Accumulator.FinalResult? {
-    guard let dataEntry = responseBody["data"] as? JSONObject else {
+    guard let dataEntry = JSONValueConversion.jsonObject(from: responseBody["data"]) else {
       return nil
     }
 
@@ -68,7 +68,7 @@ struct BaseResponseExecutionHandler: Sendable {
   }
 
   func parseErrors() -> [GraphQLError]? {
-    guard let errorsEntry = self.responseBody["errors"] as? [JSONObject] else {
+    guard let errorsEntry = JSONValueConversion.jsonObjectsArray(from: self.responseBody["errors"]) else {
       return nil
     }
 
@@ -78,6 +78,6 @@ struct BaseResponseExecutionHandler: Sendable {
   }
 
   func parseExtensions() -> JSONObject? {
-    return self.responseBody["extensions"] as? JSONObject
+    return JSONValueConversion.jsonObject(from: self.responseBody["extensions"])
   }
 }

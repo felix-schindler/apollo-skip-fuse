@@ -2,7 +2,7 @@ import Foundation
 #if canImport(FoundationNetworking)
 import FoundationNetworking
 #endif
-import ApolloAPI
+@_spi(Internal) import ApolloAPI
 
 public enum JSONResponseParsingError: Swift.Error, LocalizedError {
   case couldNotParseToJSON(data: Data)
@@ -98,7 +98,7 @@ public struct JSONResponseParser: Sendable {
 
       try Task.checkCancellation()
 
-      if let incrementalItems = parsedChunk["incremental"] as? [JSONObject] {
+      if let incrementalItems = JSONValueConversion.jsonObjectsArray(from: parsedChunk["incremental"]) {
         guard let existingResult else {
           throw IncrementalResponseError.missingExistingData
         }

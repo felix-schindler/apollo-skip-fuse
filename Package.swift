@@ -78,6 +78,16 @@ let package = Package(
         .swiftLanguageMode(.v6)
       ]
     ),
+    .testTarget(
+      name: "ApolloAPITests",
+      dependencies: [
+        "Apollo",
+        "ApolloAPI"
+      ],
+      swiftSettings: [
+        .swiftLanguageMode(.v6)
+      ]
+    ),
     .plugin(
       name: "Install CLI",
       capability: .command(

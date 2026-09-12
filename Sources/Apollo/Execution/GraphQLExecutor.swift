@@ -435,7 +435,7 @@ public final class GraphQLExecutor<Source: GraphQLExecutionSource> {
       return PossiblyDeferred { try accumulator.accept(customScalar: value, info: fieldInfo) }
 
     case let (.some(value), .list(innerType)):
-      guard let array = value as? [JSONValue] else {
+      guard let array = JSONValueConversion.jsonArray(from: value) else {
         return PossiblyDeferred { throw JSONDecodingError.wrongType }
       }
 

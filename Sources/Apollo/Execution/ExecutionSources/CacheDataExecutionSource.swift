@@ -1,4 +1,4 @@
-@_spi(Execution) import ApolloAPI
+@_spi(Execution) @_spi(Internal) import ApolloAPI
 
 /// A `GraphQLExecutionSource` configured to execute upon the data stored in a ``NormalizedCache``.
 ///
@@ -142,7 +142,7 @@ struct CacheDataExecutionSource: GraphQLExecutionSource {
                 return error
               }
             }.map { $0 as JSONValue }
-        } else if let nestedList = element as? [JSONValue] {
+        } else if let nestedList = JSONValueConversion.jsonArray(from: element) {
           return self.resolveReferences(in: nestedList, info: info)
         } else {
           return .immediate(.success(element))

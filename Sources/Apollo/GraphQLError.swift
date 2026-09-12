@@ -28,12 +28,12 @@ public struct GraphQLError: Error, Hashable {
 
   /// A list of locations in the requested GraphQL document associated with the error.
   public var locations: [Location]? {
-    return (self["locations"] as? [JSONObject])?.compactMap(Location.init)
+    return JSONValueConversion.jsonObjectsArray(from: object["locations"])?.compactMap(Location.init)
   }
 
   /// A path to the field that triggered the error, represented by an array of path components.
   public var path: [PathComponent]? {
-    return (self["path"] as? [JSONValue])?.compactMap(PathComponent.init)
+    return JSONValueConversion.jsonArray(from: object["path"])?.compactMap(PathComponent.init)
   }
 
   /// A dictionary which services can use however they see fit to provide additional information in errors to clients.

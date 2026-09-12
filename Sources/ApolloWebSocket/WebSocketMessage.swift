@@ -201,13 +201,13 @@ extension WebSocketTransport.Message.Incoming {
 
     switch type {
     case "connection_ack":
-      return .connectionAck(payload: json["payload"] as? JSONObject)
+      return .connectionAck(payload: JSONValueConversion.jsonObject(from: json["payload"]))
 
     case "ping":
-      return .ping(payload: json["payload"] as? JSONObject)
+      return .ping(payload: JSONValueConversion.jsonObject(from: json["payload"]))
 
     case "pong":
-      return .pong(payload: json["payload"] as? JSONObject)
+      return .pong(payload: JSONValueConversion.jsonObject(from: json["payload"]))
 
     case "next":
       guard
@@ -216,7 +216,7 @@ extension WebSocketTransport.Message.Incoming {
       else {
         throw WebSocketTransport.Error.unrecognizedMessage
       }
-      guard let payload = json["payload"] as? JSONObject else {
+      guard let payload = JSONValueConversion.jsonObject(from: json["payload"]) else {
         throw WebSocketTransport.Error.unrecognizedMessage
       }
       return .next(id: id, payload: payload)
@@ -228,7 +228,7 @@ extension WebSocketTransport.Message.Incoming {
       else {
         throw WebSocketTransport.Error.unrecognizedMessage
       }
-      let errorObjects = (json["payload"] as? [JSONObject]) ?? []
+      let errorObjects = (JSONValueConversion.jsonObjectsArray(from: json["payload"])) ?? []
       return .error(id: id, payload: errorObjects.map { GraphQLError($0) })
 
     case "complete":

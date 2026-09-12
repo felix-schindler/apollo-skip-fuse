@@ -150,7 +150,7 @@ extension JSONObject {
     guard let head = path.first else { return self as JSONValue }
     guard let next = self[head] else { return nil }
     if path.count == 1 { return next }
-    if let nested = next as? JSONObject {
+    if let nested = JSONValueConversion.jsonObject(from: next) {
       return nested.traverse(to: path.dropFirst())
     }
     return nil

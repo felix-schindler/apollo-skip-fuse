@@ -12,12 +12,12 @@ public final class JSONSerializationFormat {
   }
 
   private class func deserializeJSONValue(data: Data) throws -> JSONValue {
-    return try JSONSerialization.jsonObject(with: data, options: []) as! JSONValue
+    return try JSONValueConversion.convert(JSONSerialization.jsonObject(with: data, options: []))
   }
 
   public class func deserialize(data: Data) throws -> [JSONValue] {
     let value = try deserializeJSONValue(data: data)
-    guard let array = value as? [JSONValue] else {
+    guard let array = JSONValueConversion.jsonArray(from: value) else {
       throw JSONDecodingError.couldNotConvert(value: value, to: [JSONValue].self)
     }
     return array

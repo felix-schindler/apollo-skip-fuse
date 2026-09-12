@@ -19,9 +19,9 @@ public struct ResponseCodeInterceptor: HTTPInterceptor {
     }
 
     public var graphQLError: GraphQLError? {
-      if let jsonValue = try? (JSONSerialization.jsonObject(
+      if let jsonValue = try? JSONValueConversion.convert(JSONSerialization.jsonObject(
           with: chunk,
-          options: .allowFragments) as! JSONValue),
+          options: .allowFragments)),
          let jsonObject = try? JSONObject(_jsonValue: jsonValue)
       {
         return GraphQLError(jsonObject)

@@ -1,5 +1,5 @@
 import Foundation
-import ApolloAPI
+@_spi(Internal) import ApolloAPI
 
 /// A `MultipartResponseSpecificationParser` that parses response data for GraphQL subscriptions over HTTP as defined by
 /// the [`subscriptionSpec=1.0`](https://www.apollographql.com/docs/graphos/routing/operations/subscriptions/multipart-protocol)
@@ -82,7 +82,7 @@ public struct MultipartResponseSubscriptionParser: MultipartResponseSpecificatio
 
         if let payload = object.payload, !(payload is NSNull) {
           guard
-            let payload = payload as? JSONObject
+            let payload = JSONValueConversion.jsonObject(from: payload)
           else {
             throw ParsingError.cannotParsePayloadData
           }
@@ -107,7 +107,7 @@ public struct MultipartResponseSubscriptionParser: MultipartResponseSpecificatio
 
 fileprivate extension JSONObject {
   var errors: [JSONObject]? {
-    self["errors"] as? [JSONObject]
+    JSONValueConversion.jsonObjectsArray(from: self["errors"])
   }
 
   var payload: JSONValue? {

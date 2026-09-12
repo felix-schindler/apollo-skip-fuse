@@ -46,7 +46,7 @@ extension JSONResponseParser {
       operationVariables: GraphQLOperation.Variables?,
       existingRecords: RecordSet?
     ) throws {
-      guard let path = responseBody["path"] as? [JSONValue] else {
+      guard let path = JSONValueConversion.jsonArray(from: responseBody["path"]) else {
         throw IncrementalResponseError.missingPath
       }
 
@@ -125,7 +125,7 @@ extension JSONResponseParser {
     fileprivate func makeResult(
       executor: ((any Deferrable.Type) async throws -> (data: DataDict?, dependentKeys: Set<CacheKey>?))
     ) async throws -> IncrementalGraphQLResult {
-      guard let path = base.responseBody["path"] as? [JSONValue] else {
+      guard let path = JSONValueConversion.jsonArray(from: base.responseBody["path"]) else {
         throw IncrementalResponseError.missingPath
       }
       guard let label = base.responseBody["label"] as? String else {

@@ -158,14 +158,14 @@ extension FieldPolicy {
   }
   
   @usableFromInline static func jsonValueToFieldInputListData(_ val: JSONValue) -> FieldPolicy.InputListData? {
-    if let list = val as? [JSONValue] {
+    if let list = JSONValueConversion.jsonArray(from: val) {
       return FieldPolicy.InputListData(_rawType: .hashable(list), _variables: nil)
     }
     return nil
   }
   
   @usableFromInline static func jsonValueToFieldInputData(_ val: JSONValue) -> FieldPolicy.InputData? {
-    if let object = val as? JSONObject {
+    if let object = JSONValueConversion.jsonObject(from: val) {
       return FieldPolicy.InputData(_rawType: .json(object), _variables: nil)
     }
     return nil
@@ -191,7 +191,7 @@ extension InputValue {
       return FieldPolicy.InputListData(_rawType: .inputValue(list), _variables: _variables)
     case .variable(let varName):
       guard let varValue = _variables?[varName],
-            let list = varValue._jsonEncodableValue?._jsonValue as? [JSONValue] else {
+            let list = JSONValueConversion.jsonArray(from: varValue._jsonEncodableValue?._jsonValue) else {
         return nil
       }
       return FieldPolicy.InputListData(_rawType: .hashable(list), _variables: _variables)
@@ -206,7 +206,7 @@ extension InputValue {
       return FieldPolicy.InputData(_rawType: .inputValue(object), _variables: _variables)
     case .variable(let varName):
       guard let varValue = _variables?[varName],
-            let object = varValue._jsonEncodableValue?._jsonValue as? JSONObject else {
+            let object = JSONValueConversion.jsonObject(from: varValue._jsonEncodableValue?._jsonValue) else {
         return nil
       }
       return FieldPolicy.InputData(_rawType: .json(object), _variables: _variables)

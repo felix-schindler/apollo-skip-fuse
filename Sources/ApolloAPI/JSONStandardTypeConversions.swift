@@ -173,7 +173,7 @@ extension JSONEncodableDictionary: JSONEncodable {
 extension JSONObject: JSONDecodable {
   @_spi(Internal)
   @inlinable public init(_jsonValue value: JSONValue) throws {
-    guard let dictionary = value as? AnyHashable as? JSONObject else {
+    guard let dictionary = JSONValueConversion.jsonObject(from: value) else {
       throw JSONDecodingError.couldNotConvert(value: value, to: JSONObject.self)
     }
 
