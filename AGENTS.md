@@ -18,7 +18,7 @@
 - Android: `skip android build` (Skip CLI 1.9.8 is installed). It cross-compiles `aarch64-unknown-linux-android28` with the Swift Android SDK and passes `-DSKIP_BRIDGE -DTARGET_OS_ANDROID`.
 - Do not run `swift build --swift-sdk ...` with the default `swift` in `PATH`: it uses Xcode's toolchain and fails with the misleading `compiled module was created by an older version of the compiler`. `skip android build` selects the matching Swiftly 6.3.3 toolchain.
 - Minimum verification for every change: `swift build` + `swift test` (macOS) and `skip android build` (Android).
-- `Tests/ApolloAPITests` is platform-neutral: `swift test` runs it on macOS, and `skip android test` runs it on a connected device/emulator (one is usually attached here). Note that `skip android test` builds the whole package, so it currently fails until `ApolloSQLite`/`ApolloWebSocket` are ported; use `skip android build --target <name>` while a target is still broken. Upstream's full Apollo suite cannot be run from this repo.
+- `Tests/ApolloAPITests` and `Tests/ApolloWebSocketTests` are platform-neutral: `swift test` runs them on macOS, and `skip android test` runs them on a connected device/emulator (one is usually attached here). Note that `skip android test` builds the whole package, so it currently fails until `ApolloSQLite` is ported; use `skip android build --target <name>` while a target is still broken. Upstream's full Apollo suite cannot be run from this repo.
 - `skip doctor` diagnoses a broken Skip environment. The only CI here is issue triage/security; `skiptools/swift-android-action@v2` is the Skip-maintained action if Android CI is added.
 
 ## Android porting notes
@@ -36,14 +36,14 @@ import FoundationNetworking
 ```
 
 - `URLSession.bytes(for:)` / `AsyncBytes` does not exist in Android's `FoundationNetworking` (verified). The non-Darwin fallback lives in `URLSessionDataTaskChunkLoader` (delegate callbacks → `AsyncThrowingStream`) and `AsyncHTTPResponseChunkSequence+NonDarwin.swift` (multipart splitting). Keep them behaviorally in sync with the Darwin `AsyncHTTPResponseChunkSequence`; upstream test vectors for the splitting logic are in `apollo-ios-dev/Tests/ApolloTests/Network/AsyncHTTPResponseChunkSequenceTests.swift`.
-- `URLSessionWebSocketTask` compiles on Android once `FoundationNetworking` is imported; runtime support is not yet verified.
+- `URLSessionWebSocketTask` works on Android with `FoundationNetworking` (verified on-device against a live echo server over `adb reverse`). `WebSocketTask`/`WebSocketURLSession` are the protocols to mock for transport tests.
 - `JSONSerialization` returns Swift `[String: Any]`/`[Any]` on Android, not `NSDictionary`/`NSArray`, and dictionaries with existential values bridge to `NSDictionary` unpredictably. Never cast its output or nested `JSONObject` values with `as! JSONValue` / `as? JSONObject` / `as? [JSONValue]` / `as? [JSONObject]`; use `JSONValueConversion.convert(_:)`, `.jsonObject(from:)`, `.jsonArray(from:)` and `.jsonObjectsArray(from:)` (ApolloAPI `@_spi(Internal)`) instead. These normalize on both platforms; the rest of Apollo reads nested JSON through them.
 - `import SQLite3` is not available from the Android Swift SDK (verified). `ApolloSQLite` needs a system-library/module-map shim for Android's libsqlite3, or a [SkipSQL](https://skip.dev/docs/modules/skip-sql/)-based backend.
 - Gate Apple-only APIs/constants instead of deleting them, e.g. `kCFBundleIdentifierKey`/`kCFBundleVersionKey` in `Sources/Apollo/Internal Utilities/Bundle+Helpers.swift`. Use `#if canImport(...)` / `#if os(Android)` so Apple platforms keep building.
 
 ## Current Android status
 
-As of this port: `ApolloAPI` and `Apollo` build for Android, and the `ApolloAPITests` suite passes on-device with `skip android test`. The port added conditional `FoundationNetworking` imports, a `URLSessionDataTask`/delegate replacement for the Darwin `AsyncBytes` networking path, and `JSONValueConversion` to normalize Foundation JSON values that corelibs returns/bridges differently. Remaining: `ApolloWebSocket` (needs the same `FoundationNetworking` imports, then runtime verification) and `ApolloSQLite` (needs a SQLite3 solution). Re-run `skip android build` rather than trusting this snapshot.
+As of this port: `ApolloAPI`, `Apollo` and `ApolloWebSocket` build for Android, and their test targets pass on-device with `skip android test`. The port added conditional `FoundationNetworking` imports, a `URLSessionDataTask`/delegate replacement for the Darwin `AsyncBytes` networking path, and `JSONValueConversion` to normalize Foundation JSON values that corelibs returns/bridges differently. `URLSessionWebSocketTask` was verified live on Android. Remaining: `ApolloSQLite` (needs a SQLite3 solution). Re-run `skip android build` rather than trusting this snapshot.
 
 ## Versioning
 

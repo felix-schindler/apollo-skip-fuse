@@ -88,6 +88,16 @@ let package = Package(
         .swiftLanguageMode(.v6)
       ]
     ),
+    .testTarget(
+      name: "ApolloWebSocketTests",
+      dependencies: [
+        "ApolloAPI",
+        "ApolloWebSocket"
+      ],
+      swiftSettings: [
+        .swiftLanguageMode(.v6)
+      ]
+    ),
     .plugin(
       name: "Install CLI",
       capability: .command(

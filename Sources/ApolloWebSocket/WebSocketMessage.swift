@@ -1,6 +1,9 @@
 @_spi(Internal) import Apollo
 @_spi(Internal) import ApolloAPI
 import Foundation
+#if canImport(FoundationNetworking)
+import FoundationNetworking
+#endif
 
 extension WebSocketTransport {
 

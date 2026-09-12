@@ -1,4 +1,7 @@
 import Foundation
+#if canImport(FoundationNetworking)
+import FoundationNetworking
+#endif
 
 /// An abstraction over `URLSessionWebSocketTask` to allow mocking in tests.
 ///

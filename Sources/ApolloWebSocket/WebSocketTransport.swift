@@ -1,6 +1,9 @@
 @_spi(Execution) import Apollo
 @_spi(Unsafe) import ApolloAPI
 import Foundation
+#if canImport(FoundationNetworking)
+import FoundationNetworking
+#endif
 
 public actor WebSocketTransport: SubscriptionNetworkTransport, NetworkTransport {
   
