@@ -1,6 +1,10 @@
 import Foundation
 import Apollo
+#if canImport(SQLite3)
 import SQLite3
+#else
+import SwiftToolchainCSQLite
+#endif
 
 public final class ApolloSQLiteDatabase: SQLiteDatabase {
   

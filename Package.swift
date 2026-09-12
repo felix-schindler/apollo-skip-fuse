@@ -20,7 +20,9 @@ let package = Package(
     .library(name: "ApolloTestSupport", targets: ["ApolloTestSupport"]),
     .plugin(name: "InstallCLI", targets: ["Install CLI"])
   ],
-  dependencies: [],
+  dependencies: [
+    .package(url: "https://github.com/swiftlang/swift-toolchain-sqlite.git", from: "1.0.0"),
+  ],
   targets: [
     .target(
       name: "Apollo",
@@ -48,6 +50,11 @@ let package = Package(
       name: "ApolloSQLite",
       dependencies: [
         "Apollo",
+        .product(
+          name: "SwiftToolchainCSQLite",
+          package: "swift-toolchain-sqlite",
+          condition: .when(platforms: [.android, .linux, .windows])
+        ),
       ],
       resources: [
         .copy("Resources/PrivacyInfo.xcprivacy")
@@ -93,6 +100,16 @@ let package = Package(
       dependencies: [
         "ApolloAPI",
         "ApolloWebSocket"
+      ],
+      swiftSettings: [
+        .swiftLanguageMode(.v6)
+      ]
+    ),
+    .testTarget(
+      name: "ApolloSQLiteTests",
+      dependencies: [
+        "Apollo",
+        "ApolloSQLite"
       ],
       swiftSettings: [
         .swiftLanguageMode(.v6)

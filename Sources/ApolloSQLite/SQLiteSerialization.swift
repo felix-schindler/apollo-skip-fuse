@@ -1,6 +1,6 @@
 import Foundation
 @_spi(Internal) @_spi(Execution) import Apollo
-import ApolloAPI
+@_spi(Internal) import ApolloAPI
 
 private let serializedReferenceKey = "$reference"
 
@@ -31,16 +31,17 @@ enum SQLiteSerialization {
   }
 
   private static func deserialize(fieldJSONValue: JSONValue) throws -> Record.Value {
-    switch fieldJSONValue {
-    case let dictionary as JSONObject:
+    if let dictionary = JSONValueConversion.jsonObject(from: fieldJSONValue) {
       guard let reference = dictionary[serializedReferenceKey] as? String else {
         return fieldJSONValue
       }
       return CacheReference(reference)
-    case let array as [JSONValue]:
-      return try array.map { try deserialize(fieldJSONValue: $0) } as Record.Value
-    default:
-      return fieldJSONValue
     }
+
+    if let array = JSONValueConversion.jsonArray(from: fieldJSONValue) {
+      return try array.map { try deserialize(fieldJSONValue: $0) } as Record.Value
+    }
+
+    return fieldJSONValue
   }
 }
