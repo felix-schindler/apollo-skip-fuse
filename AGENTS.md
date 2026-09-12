@@ -4,7 +4,7 @@
 
 - Fork of [apollographql/apollo-ios](https://github.com/apollographql/apollo-ios) at v2.4.0 (runtime package only).
 - Fork goal: make this package build and run on Android via [Skip Fuse](https://skip.dev/docs/modes/), without breaking the Apple platforms.
-- No code generation and no CLI sources here. The CLI is a prebuilt binary: `make` unpacks `CLI/apollo-ios-cli.tar.gz`; the `InstallCLI` command plugin downloads it on demand. Upstream's full test suite lives in [apollo-ios-dev](https://github.com/apollographql/apollo-ios-dev); this fork adds a small `Tests/ApolloAPITests` target (see below).
+- No code generation and no CLI sources here. The CLI is a prebuilt binary: `make` unpacks `CLI/apollo-ios-cli.tar.gz`; the `InstallCLI` command plugin downloads it on demand. Upstream's full test suite lives in [apollo-ios-dev](https://github.com/apollographql/apollo-ios-dev); this fork adds small platform-neutral `Tests/ApolloAPITests`, `Tests/ApolloSQLiteTests` and `Tests/ApolloWebSocketTests` targets (see below).
 - Targets and dependency direction (all targets are Swift 6 language mode):
   - `ApolloAPI` — protocols/types consumed by generated models; depends on nothing.
   - `Apollo` — client, request chain/interceptors, normalized cache; depends on `ApolloAPI`.

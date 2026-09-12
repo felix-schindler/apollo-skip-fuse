@@ -54,35 +54,3 @@ playground.xcworkspace
 # Carthage/Checkouts
 
 Carthage/Build
-
-# Local Node Modules for Apollo CLI
-node_modules/
-package-lock.json
-scripts/apollo
-scripts/apollo.tar.gz
-SwiftScripts/ApolloCLI
-Tests/ApolloCodegenTests/scripts
-Tests/ApolloCodegenTests/scripts directory
-Tests/ApolloCodegenTests/Schema
-Tests/ApolloCodegenTests/Output
-SwiftScripts/.build-**
-
-# Local Netlify folder
-.netlify
-
-# Generated js files we don't need committed
-Sources/ApolloCodegenLib/Frontend/dist/
-
-# Local generated packages we don't need in the main project
-Sources/AnimalKingdomAPI/Generated/Package.swift
-Sources/AnimalKingdomAPI/Generated/Package.resolved
-Tests/TestCodeGenConfigurations/**/AnimalKingdomAPI/
-Tests/TestCodeGenConfigurations/**/AnimalKingdomAPITestMocks
-Tests/TestCodeGenConfigurations/**/Package.resolved
-Tests/TestCodeGenConfigurations/**/Podfile.lock
-Tests/TestCodeGenConfigurations/**/TestMocks
-Tests/TestCodeGenConfigurations/EmbeddedInTarget-RelativeAbsolute/PackageOne/**/*.graphql.swift
-Tests/TestCodeGenConfigurations/EmbeddedInTarget-RelativeAbsolute/PackageTwo/Sources/PackageTwo
-!Tests/TestCodeGenConfigurations/**/SchemaConfiguration.swift
-!Tests/TestCodeGenConfigurations/Other-CustomTarget/AnimalKingdomAPI/AnimalKingdomAPI.h
-!Tests/TestCodeGenConfigurations/EmbeddedInTarget-RelativeAbsolute/PackageTwo/Sources/PackageTwo/PackageTwo.swift

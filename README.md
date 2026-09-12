@@ -53,7 +53,7 @@ Runtime package only. No code generation sources, no CLI sources, no upstream te
 
 All targets use Swift 6 language mode. The public API is consumed by user-generated code from the standard Apollo CLI, so source-breaking changes are avoided.
 
-Codegen is unchanged: use the standard Apollo iOS CLI (prebuilt binary). `make` unpacks `CLI/apollo-ios-cli.tar.gz`, and the `InstallCLI` command plugin downloads the matching CLI on demand. Upstream tests live in [`apollographql/apollo-ios-dev`](https://github.com/apollographql/apollo-ios-dev) — `Tests/` here only contains a pointer README.
+Codegen is unchanged: use the standard Apollo iOS CLI (prebuilt binary). `make` unpacks `CLI/apollo-ios-cli.tar.gz`, and the `InstallCLI` command plugin downloads the matching CLI on demand. The full upstream test suite lives in [`apollographql/apollo-ios-dev`](https://github.com/apollographql/apollo-ios-dev) — `Tests/` here contains platform-neutral tests for this fork (see below).
 
 ## 🛠️ Requirements
 
@@ -95,19 +95,22 @@ Minimum verification for every change is **both**:
 
 ```sh
 swift build
+swift test
 skip android build
 ```
 
 - `swift build` builds all targets for Apple platforms (fast).
-- `skip android build` builds for Android. `skip doctor` diagnoses a broken Skip environment.
+- `swift test` runs the platform-neutral tests in `Tests/` (`ApolloAPITests`, `ApolloSQLiteTests`, `ApolloWebSocketTests`) on macOS.
+- `skip android build` builds for Android, and `skip android test` runs the same tests on a connected device or emulator. `skip doctor` diagnoses a broken Skip environment.
 - Do **not** run `swift build --swift-sdk ...` with the default `swift` in `PATH`: it uses Xcode's toolchain and fails with the misleading `compiled module was created by an older version of the compiler`. `skip android build` selects the matching Swiftly 6.3.3 toolchain.
-- There is no test target in this repo, so `swift test` runs nothing. For behavior changes, add a platform-neutral test target that runs with `swift test` on macOS and `skip android test` on a connected device/emulator. The upstream Apollo test suite cannot be run from this repo.
+- For behavior changes, extend the platform-neutral tests in `Tests/` where reasonable. The full upstream Apollo test suite cannot be run from this repo.
+- CI (`.github/workflows/ci.yml`) runs `swift build` + `swift test` on macOS and builds/tests on an Android emulator.
 
 ## 🤖 Android porting notes
 
 Following Skip's [porting guide](https://skip.dev/docs/porting/) and [module catalog](https://skip.dev/docs/modules/). Repo-specific facts already verified:
 
-- This is a **Fuse** (native Swift) target, not Lite/transpiled Kotlin. Don't add Skip Lite frameworks (e.g. SkipFoundation, SkipUI) to fill Foundation gaps; fix with `canImport`/`FoundationNetworking` (or SkipSQL for SQLite, which supports Fuse).
+- This is a **Fuse** (native Swift) target, not Lite/transpiled Kotlin. Foundation gaps are fixed with `canImport`/`FoundationNetworking`, not Skip Lite frameworks (e.g. SkipFoundation, SkipUI).
 - On Android, `Foundation` splits networking into `FoundationNetworking`. Files using `URLSession`, `URLRequest`, `URLResponse`, or `HTTPURLResponse` need:
 
 ```swift
@@ -116,14 +119,15 @@ import FoundationNetworking
 #endif
 ```
 
-- `URLSession.bytes(for:)` / `AsyncBytes` does not exist in Android's `FoundationNetworking` (verified with a scratch package). Apollo's chunked/multipart response path (`ApolloURLSession`, `AsyncHTTPResponseChunkSequence`) needs a `dataTask`/delegate-based fallback for Android.
-- `URLSessionWebSocketTask` does compile on Android, so `ApolloWebSocket` should need fewer changes than the core client.
-- `import SQLite3` is not available from the Android Swift SDK (verified). `ApolloSQLite` needs a system-library/module-map shim for Android's libsqlite3, or a [SkipSQL](https://skip.dev/docs/modules/skip-sql/)-based backend.
-- Gate Apple-only APIs/constants instead of deleting them, e.g. `kCFBundleIdentifierKey`/`kCFBundleVersionKey` in `Sources/Apollo/Internal Utilities/Bundle+Helpers.swift`. Use `#if canImport(...)` / `#if os(Android)` so Apple platforms keep building.
+- `URLSession.bytes(for:)` / `AsyncBytes` does not exist in Android's `FoundationNetworking`. The chunked/multipart response path (`ApolloURLSession`, `AsyncHTTPResponseChunkSequence`) uses a `dataTask`/delegate-based fallback on non-Darwin platforms (`URLSessionDataTaskChunkLoader`, `AsyncHTTPResponseChunkSequence+NonDarwin.swift`), kept behaviorally in sync with the Darwin implementation.
+- `URLSessionWebSocketTask` compiles and works on Android (verified on-device against a live echo server), so `ApolloWebSocket` needed only the `FoundationNetworking` import.
+- `JSONSerialization` returns Swift `[String: Any]`/`[Any]` on Android instead of `NSDictionary`/`NSArray`. Nested JSON is read through `JSONValueConversion` (`ApolloAPI` `@_spi(Internal)`) rather than direct casts — never cast its output with `as! JSONValue` / `as? JSONObject` / `as? [JSONValue]`.
+- `import SQLite3` is unavailable from the Android Swift SDK. `ApolloSQLite` depends on `SwiftToolchainCSQLite` (used on Android/Linux/Windows) and imports it when `SQLite3` can't be imported; Apple builds keep using the system SQLite.
+- Apple-only APIs/constants are gated instead of deleted, e.g. `kCFBundleIdentifierKey`/`kCFBundleVersionKey` in `Sources/Apollo/Internal Utilities/Bundle+Helpers.swift`. Use `#if canImport(...)` / `#if os(Android)` so Apple platforms keep building.
 
 ## 📊 Current Android status
 
-Initial fork state (upstream v2.4.0): `ApolloAPI` compiles for Android; `Apollo` fails with errors in the `FoundationNetworking` and CFBundle-key categories above; `ApolloSQLite` / `ApolloWebSocket` have not been reached yet. Re-run `skip android build` rather than trusting this snapshot.
+All five targets (`ApolloAPI`, `Apollo`, `ApolloSQLite`, `ApolloWebSocket`, `ApolloTestSupport`) build for Android, and the tests in `Tests/` pass on-device with `skip android test`. Re-run `skip android build` / `skip android test` rather than trusting this snapshot.
 
 ## 🔖 Versioning
 
@@ -159,7 +163,7 @@ git tag vX.Y.Z && git push origin vX.Y.Z
 
 ## 🏆 Contributing
 
-Contributions that move Android support forward without breaking Apple platforms or the public API are welcome. There is no test target in this repo — include a platform-neutral test target for behavior changes where reasonable, and verify with both `swift build` and `skip android build`. For upstream Apollo iOS contributions, see [`apollographql/apollo-ios-dev`](https://github.com/apollographql/apollo-ios-dev/blob/main/CONTRIBUTING.md).
+Contributions that move Android support forward without breaking Apple platforms or the public API are welcome. For behavior changes, extend the platform-neutral tests in `Tests/` where reasonable, and verify with `swift build` + `swift test` and `skip android build` (see above). For upstream Apollo iOS contributions (codegen, CLI, Apple-only runtime work), see [`apollographql/apollo-ios-dev`](https://github.com/apollographql/apollo-ios-dev/blob/main/CONTRIBUTING.md).
 
 ## 🪪 License
 
