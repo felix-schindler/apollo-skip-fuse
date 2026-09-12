@@ -98,6 +98,7 @@ let package = Package(
     .testTarget(
       name: "ApolloWebSocketTests",
       dependencies: [
+        "Apollo",
         "ApolloAPI",
         "ApolloWebSocket"
       ],
