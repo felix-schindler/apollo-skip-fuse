@@ -4,7 +4,7 @@
 
 - Fork of [apollographql/apollo-ios](https://github.com/apollographql/apollo-ios) at v2.4.0 (runtime package only).
 - Fork goal: make this package build and run on Android via [Skip Fuse](https://skip.dev/docs/modes/), without breaking the Apple platforms.
-- No code generation and no CLI sources here. The CLI is a prebuilt binary: `make` unpacks `CLI/apollo-ios-cli.tar.gz`; the `InstallCLI` command plugin downloads it on demand. Upstream's full test suite lives in [apollo-ios-dev](https://github.com/apollographql/apollo-ios-dev); this fork adds small platform-neutral `Tests/ApolloAPITests`, `Tests/ApolloSQLiteTests` and `Tests/ApolloWebSocketTests` targets (see below).
+- No code generation here. The CLI is a prebuilt binary: `make` unpacks `CLI/apollo-ios-cli.tar.gz` into `apollo-ios-cli`; `scripts/cli-version-check.sh` verifies it matches `ApolloClientVersion`. Upstream's full test suite lives in [apollo-ios-dev](https://github.com/apollographql/apollo-ios-dev); this fork adds small platform-neutral `Tests/ApolloAPITests`, `Tests/ApolloSQLiteTests` and `Tests/ApolloWebSocketTests` targets (see below).
 - Targets and dependency direction (all targets are Swift 6 language mode):
   - `ApolloAPI` — protocols/types consumed by generated models; depends on nothing.
   - `Apollo` — client, request chain/interceptors, normalized cache; depends on `ApolloAPI`.
@@ -47,5 +47,5 @@ All five targets (`ApolloAPI`, `Apollo`, `ApolloSQLite`, `ApolloWebSocket`, `Apo
 
 ## Versioning
 
-- `ApolloClientVersion` in `Sources/Apollo/Constants.swift` is the source of truth; `scripts/get-version.sh` and the CLI download script derive from it. Don't bump it without a matching release, or `InstallCLI` will try to download a nonexistent tarball.
+- `ApolloClientVersion` in `Sources/Apollo/Constants.swift` is the source of truth and is kept in sync with the bundled CLI tarball; `scripts/cli-version-check.sh` verifies they match. Don't bump it without a matching release.
 - Releases: push tag `vX.Y.Z` → `.github/workflows/release.yml` creates a GitHub release with body from `changelogs/vX.Y.Z.md`. Add the changelog file first, then `git tag vX.Y.Z && git push origin vX.Y.Z`. Fork tags use a `v` prefix; upstream tags are bare numbers.

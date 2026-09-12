@@ -18,7 +18,6 @@ let package = Package(
     .library(name: "ApolloSQLite", targets: ["ApolloSQLite"]),
     .library(name: "ApolloWebSocket", targets: ["ApolloWebSocket"]),
     .library(name: "ApolloTestSupport", targets: ["ApolloTestSupport"]),
-    .plugin(name: "InstallCLI", targets: ["Install CLI"])
   ],
   dependencies: [
     .package(url: "https://github.com/swiftlang/swift-toolchain-sqlite.git", from: "1.0.0"),
@@ -115,19 +114,6 @@ let package = Package(
       swiftSettings: [
         .swiftLanguageMode(.v6)
       ]
-    ),
-    .plugin(
-      name: "Install CLI",
-      capability: .command(
-        intent: .custom(
-          verb: "apollo-cli-install",
-          description: "Installs the Apollo iOS Command line interface."),
-        permissions: [
-          .writeToPackageDirectory(reason: "Downloads and unzips the CLI executable into your project directory."),
-          .allowNetworkConnections(scope: .all(ports: []), reason: "Downloads the Apollo iOS CLI executable from the GitHub Release.")
-        ]),
-      dependencies: [],
-      path: "Plugins/InstallCLI"
     )
   ],
   swiftLanguageModes: [.v6, .v5]
