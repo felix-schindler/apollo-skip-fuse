@@ -35,14 +35,14 @@ import FoundationNetworking
 #endif
 ```
 
-- `URLSession.bytes(for:)` / `AsyncBytes` does not exist in Android's `FoundationNetworking` (verified with a scratch package). Apollo's chunked/multipart response path (`ApolloURLSession`, `AsyncHTTPResponseChunkSequence`) needs a `dataTask`/delegate-based fallback for Android.
-- `URLSessionWebSocketTask` does compile on Android, so `ApolloWebSocket` should need fewer changes than the core client.
+- `URLSession.bytes(for:)` / `AsyncBytes` does not exist in Android's `FoundationNetworking` (verified). The non-Darwin fallback lives in `URLSessionDataTaskChunkLoader` (delegate callbacks → `AsyncThrowingStream`) and `AsyncHTTPResponseChunkSequence+NonDarwin.swift` (multipart splitting). Keep them behaviorally in sync with the Darwin `AsyncHTTPResponseChunkSequence`; upstream test vectors for the splitting logic are in `apollo-ios-dev/Tests/ApolloTests/Network/AsyncHTTPResponseChunkSequenceTests.swift`.
+- `URLSessionWebSocketTask` compiles on Android once `FoundationNetworking` is imported; runtime support is not yet verified.
 - `import SQLite3` is not available from the Android Swift SDK (verified). `ApolloSQLite` needs a system-library/module-map shim for Android's libsqlite3, or a [SkipSQL](https://skip.dev/docs/modules/skip-sql/)-based backend.
 - Gate Apple-only APIs/constants instead of deleting them, e.g. `kCFBundleIdentifierKey`/`kCFBundleVersionKey` in `Sources/Apollo/Internal Utilities/Bundle+Helpers.swift`. Use `#if canImport(...)` / `#if os(Android)` so Apple platforms keep building.
 
 ## Current Android status
 
-Initial fork state (upstream v2.4.0): `ApolloAPI` compiles for Android; `Apollo` fails with hundreds of errors, all in the `FoundationNetworking` and CFBundle-key categories above; `ApolloSQLite` / `ApolloWebSocket` have not been reached yet. Re-run `skip android build` rather than trusting this snapshot.
+As of this port: `ApolloAPI` **and** `Apollo` build for Android (`skip android build --target Apollo`). The `Apollo` port added conditional `FoundationNetworking` imports plus a `URLSessionDataTask`/delegate replacement for the Darwin `AsyncBytes` networking path. Remaining: `ApolloWebSocket` (needs the same `FoundationNetworking` imports, then runtime verification) and `ApolloSQLite` (needs a SQLite3 solution). Re-run `skip android build` rather than trusting this snapshot.
 
 ## Versioning
 

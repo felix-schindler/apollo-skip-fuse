@@ -12,12 +12,12 @@ extension Bundle {
 
   /// The bundle identifier of this bundle, or nil if not present.
   var bundleIdentifier: String? {
-    return self.bundleValue(forKey: String(kCFBundleIdentifierKey))
+    return self.bundleValue(forKey: "CFBundleIdentifier")
   }
 
   /// The build number of this bundle (kCFBundleVersion) as a string, or nil if not present.
   var buildNumber: String? {
-    return self.bundleValue(forKey: String(kCFBundleVersionKey))
+    return self.bundleValue(forKey: "CFBundleVersion")
   }
 
   /// The short version string for this bundle, or nil if not present.

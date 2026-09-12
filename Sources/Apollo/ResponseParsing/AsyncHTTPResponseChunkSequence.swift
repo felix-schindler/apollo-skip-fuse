@@ -8,6 +8,8 @@ public protocol AsyncChunkSequence: AsyncSequence, Sendable where Element == Dat
   
 }
 
+#if canImport(Darwin)
+
 /// An ``AsyncChunkSequence`` implementation that parses the chunks of an HTTP multi-part response from a
 /// `URLSession.AsyncBytes` data stream. It uses the multi-part boundary specified by the `HTTPURLResponse` to split
 /// the data into chunks as it is received.
@@ -101,3 +103,5 @@ extension URLSession.AsyncBytes {
   }
 
 }
+
+#endif

@@ -1,4 +1,7 @@
 import Foundation
+#if canImport(FoundationNetworking)
+import FoundationNetworking
+#endif
 
 /// A protocol for a networking session used by Apollo to execute network requests.
 ///
@@ -19,6 +22,7 @@ public protocol ApolloURLSession: Sendable {
   func chunks(for request: URLRequest) async throws -> (any AsyncChunkSequence, URLResponse)
 }
 
+#if canImport(Darwin)
 extension URLSession: ApolloURLSession {
   public func chunks(for request: URLRequest) async throws -> (any AsyncChunkSequence, URLResponse) {
     try Task.checkCancellation()
@@ -26,3 +30,14 @@ extension URLSession: ApolloURLSession {
     return (bytes.chunks, response)
   }
 }
+#else
+extension URLSession: ApolloURLSession {
+  /// `URLSession.bytes(for:)` is not available outside of Darwin platforms, so a `URLSessionDataTask` with a
+  /// delegate is used to stream the response body instead. See ``URLSessionDataTaskChunkLoader``.
+  public func chunks(for request: URLRequest) async throws -> (any AsyncChunkSequence, URLResponse) {
+    try Task.checkCancellation()
+    let loader = URLSessionDataTaskChunkLoader()
+    return try await loader.start(request: request, configuration: self.configuration)
+  }
+}
+#endif
