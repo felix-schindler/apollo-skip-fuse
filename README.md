@@ -67,12 +67,18 @@ Codegen is unchanged: use the standard Apollo iOS CLI (prebuilt binary). `make` 
 
 ```swift title="Package.swift"
 dependencies: [
+    // Until a fork release is tagged, track `main` (see "Releases" below).
     .package(
         url: "https://github.com/felix-schindler/apollo-skip-fuse.git",
-        .upToNextMajor(from: "2.4.0")
+        branch: "main"
     ),
 ],
 ```
+
+> **Skip Fuse apps:** use the URL form above. `skipstone` stages the package graph and rewrites
+> remote dependencies to local paths; a relative `.package(path:)` that points outside the app
+> directory (e.g. `../apollo-skip-fuse`) resolves for Apple builds but breaks Android package
+> resolution during `skip app launch`. (An absolute path also works but is machine-specific.)
 
 ### Link the Apollo product to your package target
 
@@ -88,6 +94,13 @@ Any targets in your application that will use `ApolloClient` need a dependency o
 ```
 
 > **Note:** Targets that only use Apollo's generated models don't need to be linked to the `Apollo` product. For codegen and schema workflows, follow the [upstream Getting Started guide](https://www.apollographql.com/docs/ios/get-started?utm_source=github&utm_medium=apollographql_apollo-client&utm_campaign=readme).
+
+> **Codegen rewrites nested package manifests:** the CLI's `swiftPackage` module type always writes a
+> `Package.swift` that depends on upstream `apollographql/apollo-ios` with `exact: "2.4.0"`. If your
+> generated module lives in its own package (e.g. `GitLabAPI/`), re-apply the fork dependency there
+> after every `./apollo-ios-cli generate` (then `swift package resolve`); otherwise resolution mixes
+> upstream and fork copies of the same targets and fails with "multiple similar targets". Consider
+> switching that module to a non-`swiftPackage` module type if regeneration churn is a problem.
 
 ## ✅ Build and verify
 
@@ -124,10 +137,11 @@ import FoundationNetworking
 - `JSONSerialization` returns Swift `[String: Any]`/`[Any]` on Android instead of `NSDictionary`/`NSArray`. Nested JSON is read through `JSONValueConversion` (`ApolloAPI` `@_spi(Internal)`) rather than direct casts — never cast its output with `as! JSONValue` / `as? JSONObject` / `as? [JSONValue]`.
 - `import SQLite3` is unavailable from the Android Swift SDK. `ApolloSQLite` depends on `SwiftToolchainCSQLite` (used on Android/Linux/Windows) and imports it when `SQLite3` can't be imported; Apple builds keep using the system SQLite.
 - Apple-only APIs/constants are gated instead of deleted, e.g. `kCFBundleIdentifierKey`/`kCFBundleVersionKey` in `Sources/Apollo/Internal Utilities/Bundle+Helpers.swift`. Use `#if canImport(...)` / `#if os(Android)` so Apple platforms keep building.
+- Do **not** redeclare members that Android's `Foundation` already provides. `Bundle.bundleIdentifier` exists there, so Apollo's helper extension omits it on Android (`#if !os(Android)`): redeclaring it makes `Bundle.bundleIdentifier` an ambiguous override target when the Skip bridge's `AndroidBundle` subclass vtable is deserialized in any module that imports Apollo, crashing `swift-frontend` with a SIL vtable deserialization failure (this broke `skip app launch` until gated).
 
 ## 📊 Current Android status
 
-All five targets (`ApolloAPI`, `Apollo`, `ApolloSQLite`, `ApolloWebSocket`, `ApolloTestSupport`) build for Android, and the tests in `Tests/` pass on-device with `skip android test`. Re-run `skip android build` / `skip android test` rather than trusting this snapshot.
+All five targets (`ApolloAPI`, `Apollo`, `ApolloSQLite`, `ApolloWebSocket`, `ApolloTestSupport`) build for Android, and the tests in `Tests/` pass on-device with `skip android test`. A real Skip Fuse app (Apollo + generated models + SkipFuseUI) also compiles, packages, installs and launches on Android 12; the `swift-frontend` SIL vtable crash that previously blocked app compilation was the `Bundle.bundleIdentifier` collision described above. Re-run `skip android build` / `skip android test` rather than trusting this snapshot.
 
 ## 🔖 Versioning
 
