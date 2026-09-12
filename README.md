@@ -129,6 +129,16 @@ Initial fork state (upstream v2.4.0): `ApolloAPI` compiles for Android; `Apollo`
 
 `ApolloClientVersion` in `Sources/Apollo/Constants.swift` is the source of truth; `scripts/get-version.sh` and the CLI download script derive from it. Don't bump it without a matching release, or `InstallCLI` will try to download a nonexistent tarball. This fork tracks upstream `2.4.0`.
 
+## 🚢 Releases
+
+Push tag `vX.Y.Z` → `.github/workflows/release.yml` creates a GitHub release with the body from `changelogs/vX.Y.Z.md`. Release process: add `changelogs/vX.Y.Z.md` → tag and push:
+
+```sh
+git tag vX.Y.Z && git push origin vX.Y.Z
+```
+
+> **Note:** fork tags use a `v` prefix (`v2.4.1`), while upstream tags are bare numbers (`2.4.0`) — they won't collide. Fork releases don't affect the CLI download, which pulls the upstream tarball by `ApolloClientVersion`.
+
 ## 💡 Resources
 
 | Resource | Description | Link |

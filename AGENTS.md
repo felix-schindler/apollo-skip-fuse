@@ -47,3 +47,4 @@ As of this port: `ApolloAPI` **and** `Apollo` build for Android (`skip android b
 ## Versioning
 
 - `ApolloClientVersion` in `Sources/Apollo/Constants.swift` is the source of truth; `scripts/get-version.sh` and the CLI download script derive from it. Don't bump it without a matching release, or `InstallCLI` will try to download a nonexistent tarball.
+- Releases: push tag `vX.Y.Z` → `.github/workflows/release.yml` creates a GitHub release with body from `changelogs/vX.Y.Z.md`. Add the changelog file first, then `git tag vX.Y.Z && git push origin vX.Y.Z`. Fork tags use a `v` prefix; upstream tags are bare numbers.
