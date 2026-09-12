@@ -53,7 +53,7 @@ Runtime package only. No code generation sources, no CLI sources, no upstream te
 
 All targets use Swift 6 language mode. The public API is consumed by user-generated code from the standard Apollo CLI, so source-breaking changes are avoided.
 
-Codegen is unchanged: use the standard Apollo iOS CLI (prebuilt binary). `make` unpacks `CLI/apollo-ios-cli.tar.gz`, and the `InstallCLI` command plugin downloads the matching CLI on demand. The full upstream test suite lives in [`apollographql/apollo-ios-dev`](https://github.com/apollographql/apollo-ios-dev) — `Tests/` here contains platform-neutral tests for this fork (see below).
+Codegen is unchanged: use the standard Apollo iOS CLI (prebuilt binary). `make` unpacks `CLI/apollo-ios-cli.tar.gz`. The full upstream test suite lives in [`apollographql/apollo-ios-dev`](https://github.com/apollographql/apollo-ios-dev) — `Tests/` here contains platform-neutral tests for this fork (see below).
 
 ## 🛠️ Requirements
 
@@ -131,7 +131,7 @@ All five targets (`ApolloAPI`, `Apollo`, `ApolloSQLite`, `ApolloWebSocket`, `Apo
 
 ## 🔖 Versioning
 
-`ApolloClientVersion` in `Sources/Apollo/Constants.swift` is the source of truth; `scripts/get-version.sh` and the CLI download script derive from it. Don't bump it without a matching release, or `InstallCLI` will try to download a nonexistent tarball. This fork tracks upstream `2.4.0`.
+`ApolloClientVersion` in `Sources/Apollo/Constants.swift` is the source of truth and is kept in sync with the bundled CLI tarball; `scripts/cli-version-check.sh` verifies they match. This fork tracks upstream `2.4.0`.
 
 ## 🚢 Releases
 
