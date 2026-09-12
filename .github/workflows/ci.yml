@@ -1,0 +1,36 @@
+name: CI
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
+
+jobs:
+  apple:
+    name: macOS
+    runs-on: macos-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v7
+
+      - name: Build
+        run: swift build
+
+      - name: Test
+        run: swift test
+
+  android:
+    name: Android emulator
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v7
+
+      - name: Build and test on Android
+        uses: skiptools/swift-android-action@v2
+        with:
+          # The Ubuntu runner is low on disk space, which can prevent the emulator from booting.
+          free-disk-space: true

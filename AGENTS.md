@@ -19,7 +19,7 @@
 - Do not run `swift build --swift-sdk ...` with the default `swift` in `PATH`: it uses Xcode's toolchain and fails with the misleading `compiled module was created by an older version of the compiler`. `skip android build` selects the matching Swiftly 6.3.3 toolchain.
 - Minimum verification for every change: `swift build` + `swift test` (macOS) and `skip android build` (Android).
 - `Tests/ApolloAPITests`, `Tests/ApolloWebSocketTests` and `Tests/ApolloSQLiteTests` are platform-neutral: `swift test` runs them on macOS, and `skip android test` builds the whole package and runs them on a connected device/emulator (one is usually attached here). Upstream's full Apollo suite cannot be run from this repo.
-- `skip doctor` diagnoses a broken Skip environment. The only CI here is issue triage/security; `skiptools/swift-android-action@v2` is the Skip-maintained action if Android CI is added.
+- `.github/workflows/ci.yml` builds and tests on macOS (`swift test`) and on an Android emulator via `skiptools/swift-android-action@v2`. The other workflows are issue triage/security only. `skip doctor` diagnoses a broken local Skip environment.
 
 ## Android porting notes
 
