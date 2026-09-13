@@ -16,7 +16,7 @@
 ## Consumer integration gotchas
 
 - Skip Fuse apps must depend on this package by URL (`branch: "main"` until a fork release exists). `skipstone` stages the package graph and rewrites remote dependencies to local paths; a relative `.package(path:)` pointing outside the app directory still builds for Apple platforms but breaks Android package resolution during `skip app launch`.
-- The CLI's `swiftPackage` module type always rewrites a nested generated `Package.swift` to upstream `apollographql/apollo-ios` at `exact: "2.4.0"`. After every `./apollo-ios-cli generate`, re-apply the fork dependency there and run `swift package resolve`; otherwise resolution mixes upstream and fork copies of the same targets and fails with "multiple similar targets". Switching the generated module off `swiftPackage` avoids the churn.
+- The CLI's `swiftPackage` module type always rewrites a nested generated `Package.swift` to upstream `apollographql/apollo-ios` at `exact: "2.4.0"`. After every `./apollo-ios-cli generate`, re-apply the fork dependency there and run `swift package resolve`; otherwise resolution mixes upstream and fork copies of the same targets and fails with "multiple similar targets". Switching the generated module off `swiftPackage` avoids the churn. The test app wraps this in `scripts/generate.sh`, which runs codegen, restores the committed fork manifest and re-resolves.
 
 ## Build and verify
 
@@ -51,7 +51,7 @@ import FoundationNetworking
 
 ## Known open items
 
-- One app-side report (2026-09-12) saw two WebSocket connections for a single subscription on a physical Android 12 device. The same flow through `WebSocketTransport` on an emulator opened exactly one connection, so check for a second transport instance before changing transport code. Auto-reconnect after a dropped connection is unverified.
+- A 2026-09-12 app-side report of two WebSocket connections for a single subscription was not reproduced: one `WebSocketTransport` opens exactly one connection on both an emulator and the physical Android 12 device (raw task and transport, `URLSession.shared` and custom configuration). Treat any recurrence as two transports or two app processes first. Auto-reconnect after a dropped connection is unverified.
 
 ## Current Android status
 
