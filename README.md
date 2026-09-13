@@ -9,8 +9,9 @@ Add the package to your `Package.swift`:
 
 ```swift
 dependencies: [
-    // Until the first fork release is tagged, track `main`.
-    .package(url: "https://github.com/felix-schindler/apollo-skip-fuse.git", branch: "main"),
+    // v2.4.0 is the first fork release (apollo-ios v2.4.0 runtime + Android support).
+    // Track `branch: "main"` instead for unreleased changes.
+    .package(url: "https://github.com/felix-schindler/apollo-skip-fuse.git", from: "2.4.0"),
 ],
 ```
 
@@ -45,7 +46,7 @@ All targets use Swift 6 language mode. The public API is consumed by user-genera
 
 ## Status
 
-All five targets build for Android, the platform-neutral tests in `Tests/` pass on-device with `skip android test`, and a real Skip Fuse app (Apollo + generated models + SkipFuseUI) compiles, installs, and launches on Android 12. The SQLite cache has been verified at runtime on Android, and networking, subscriptions, and the non-Darwin streaming fallback have been exercised there too. [AGENTS.md](AGENTS.md) has the porting notes and current open items.
+All five targets build for Android, the platform-neutral tests in `Tests/` pass on-device with `skip android test`, and a real Skip Fuse app (Apollo + generated models + SkipFuseUI) compiles, installs, and launches on Android 12. The SQLite cache has been verified at runtime on Android, and networking, subscriptions (including auto-reconnect after a dropped connection), and the non-Darwin streaming fallback have been exercised there too. [AGENTS.md](AGENTS.md) has the porting notes and current open items.
 
 ## Building and testing
 
