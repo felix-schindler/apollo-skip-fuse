@@ -162,7 +162,7 @@ public struct GraphQLExecutionError: Error, LocalizedError {
 
   /// A description of the error which includes the path where the error occurred.
   public var errorDescription: String? {
-    return "Error at path \"\(path))\": \(underlying)"
+    return "Error at path \"\(path)\": \(underlying)"
   }
 }
 
@@ -472,7 +472,14 @@ public final class GraphQLExecutor<Source: GraphQLExecutionSource> {
       }
 
     case let (.some(value), .object(rootSelectionSetType)):
-      guard let object = value as! AnyHashable as? Source.RawObjectData else {
+      // A nested JSON object that contains lists/objects can arrive here bridged to `NSDictionary`
+      // on corelibs Foundation, which the direct `RawObjectData` cast then rejects (this is the
+      // object-level counterpart of the list case above). Normalize first, then cast.
+      guard
+        let object =
+          (JSONValueConversion.jsonObject(from: value) as? Source.RawObjectData)
+          ?? (value as! AnyHashable as? Source.RawObjectData)
+      else {
         return PossiblyDeferred { throw JSONDecodingError.wrongType }
       }
 
