@@ -77,15 +77,29 @@ public struct DataDict: Hashable, @unchecked Sendable {
     )
   }
 
+  /// The stored value for `key` as `AnyHashable`, or `nil` when the field is absent or explicitly
+  /// `null`.
+  ///
+  /// A GraphQL `null` scalar is stored as `NSNull` (see `DataDictMapper.acceptNullValue`). On
+  /// Darwin, force-casting `AnyHashable(NSNull())` to an optional scalar yields `nil`, but
+  /// swift-corelibs-foundation on Android has no such special case, so the cast traps. Normalizing
+  /// `NSNull` to `nil` here makes optional scalar fields read as `.none` on every platform, while a
+  /// non-optional field reading a null value still traps, matching Darwin.
+  @usableFromInline
+  func _anyHashableScalar(forKey key: String) -> AnyHashable? {
+    guard let stored = _data[key], !(stored is NSNull) else { return nil }
+    return stored as? AnyHashable
+  }
+
   @inlinable public subscript<T: AnyScalarType & Hashable & Sendable>(_ key: String) -> T {
     get {
-      return _data[key] as? AnyHashable as! T
+      return _anyHashableScalar(forKey: key) as! T
     }
     set {
       _data[key] = newValue
     }
     _modify {
-      var value = _data[key] as! T
+      var value = _anyHashableScalar(forKey: key) as! T
       defer { _data[key] = value }
       yield &value
     }
